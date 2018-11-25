@@ -1,0 +1,103 @@
+"""
+from monzo.monzo import Monzo # Import Monzo class
+from pprint import pprint
+import json
+import hashlib
+import machineLearning
+
+client = Monzo('eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJlYiI6InpZS2pBb3lWV0RjNmNkMkd0TkFmIiwianRpIjoiYWNjdG9rXzAwMDA5ZDZtMDZNVnZyZW91bkVnSFIiLCJ0eXAiOiJhdCIsInYiOiI1In0.SllGxvyF4RO4f093tPg3mgIZCc-Z-tsIxKG7dkX8HspMyKDGF5FQIc-fRf9CHzcE3GQOvI9oqos_jE1xKJBfYw') # Replace access token with a valid token found at: https://developers.monzo.com/
+# account_id = client.get_first_account()['id'] # Get the ID of the first account linked to the access token
+account_id = "acc_00009VIJcdBdP5vmFVETYn"
+"""
+#When Monzo breaks my client / account_ID do this:
+#1. Get client ID from developer.monzo
+2. Get second account ID of my main bank account from the get request on their website
+"""
+
+
+balance = client.get_balance(account_id) # Get your balance object
+#print("My balance is ", balance['balance']) # 100000000000
+#print(balance['currency']) # GBP
+#print(balance['spend_today']) # 2000
+
+
+
+transactions = client.get_transactions(account_id)
+# loaded_json = json.loads(transactions)
+#for x in transactions:
+	#print("{}: {}".format(x, transactions[x]))
+
+# pprint(transactions['transactions'][-1])
+trans = transactions['transactions']
+import numpy as np
+
+def weightingFunction(number):
+    return abs(number) * 250
+
+# for every single transaction, update it with the weighting function abs(transaction) * 250
+newList = []
+for c, t in enumerate(trans):
+    if (t['amount']) < 0:
+        tempAmount = t['amount']
+        tempAmount = weightingFunction(tempAmount)
+        transactions['transactions'][c]['amount'] = tempAmount
+        newList.append(tempAmount)
+
+transactions['transactions'][-1]['isHighRiskCountry'] = 0
+
+
+
+
+transactionAmount = transactions['transactions'][-1]['amount']
+isDeclined = 0
+if transactions['transactions'][-1]['merchant']['address']['formatted'] == "United Kingdom":
+    isForeignTransaction = 0
+else:
+    isForeignTransaction = 1
+isHighRiskCountry = transactions['transactions'][-1]['isHighRiskCountry']
+
+
+toSum = 0
+toLen = 0
+print(transactions)
+
+
+#return 1 #(merchantId, average, transactionAmount, isDeclined, isForeignTransaction, isHighRiskCountry)
+
+#xTest=getLatestData()
+#print(xTest)
+#predict(isForeignTransaction, isHighRiskCountry)
+#print(transactions['transactions'][-1]['merchant']['id'])
+#predict("test")
+
+#     """
+    #for c, t in enumerate(transactions):
+     #   print(t)
+      #  break
+       # toSum += t[toLen]['amount']
+        #toLen += 1
+    #average = toSum / toLen"""
+
+  # """ s = transactions['transactions'][-1]['merchant']['id']
+   # merchantId = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**8"""
+
+
+
+
+# pprint(transactions)
+
+# get_transactions
+""""
+    
+
+# pprint(transactions['transactions'][-1]['isHighRiskCountry'])
+"""
+Belarus, China, Cuba, India, Iran, Israel, Libya, 	
+North Korea, Pakistan, Russia, Syria or Ukraine	
+"""
+
+
+
+# pprint(transactions)
+
+# get_transactions
