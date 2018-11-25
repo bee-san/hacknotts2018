@@ -50,8 +50,10 @@ def predictKNN(x, name, text):
     print("\t\t{}".format(text))
     if (y_pred[0] == 1):
         print("\nYes, this is likely to be fraudulent\n")
+        return 1
     else:
         print("\nNo, this is not likely to be fraudulent\n")
+        return 0
 
 def predict(x, name, text):
     decisiontree = DecisionTreeClassifier()
@@ -65,8 +67,10 @@ def predict(x, name, text):
     print("\t\t{}".format(text))
     if (y_pred[0] == 1):
         print("Yes, this is likely to be fraudulent\n")
+        return 1
     else:
         print("No, this is not likely to be fraudulent\n")
+        return 0
 
 #predict(X_test)
 

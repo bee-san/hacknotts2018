@@ -8,41 +8,32 @@ client = Monzo('eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJlYiI6InpZS2pBb3lWV0RjNmN
 # account_id = client.get_first_account()['id'] # Get the ID of the first account linked to the access token
 account_id = "acc_00009VIJcdBdP5vmFVETYn"
 balance = client.get_balance(account_id) # Get your balance object
-#print("My balance is ", balance['balance']) # 100000000000
-#print(balance['currency']) # GBP
-#print(balance['spend_today']) # 2000
 
-
-
-transactions = client.get_transactions(account_id)
-# loaded_json = json.loads(transactions)
-#for x in transactions:
-	#print("{}: {}".format(x, transactions[x]))
-
-# pprint(transactions['transactions'][-1])
-trans = transactions['transactions']
-import numpy as np
 
 def weightingFunction(number):
-    return abs(number) #* 250
+    return abs(number/100)
+    # for every single transaction, update it with the weighting function abs(transaction) 
 
-def main():
-    # for every single transaction, update it with the weighting function abs(transaction) * 250
-    newList = []
-    for c, t in enumerate(trans):
-        if (t['amount']) < 0:
-            tempAmount = t['amount']
-            tempAmount = weightingFunction(tempAmount)
-            transactions['transactions'][c]['amount'] = tempAmount
-            newList.append(tempAmount)
+transactions = client.get_transactions(account_id)
 
-    transactions['transactions'][-1]['isHighRiskCountry'] = 0
-    
+trans = transactions['transactions']
 
-    ##transactions['transactions']['isHighRiskCountry'] = 1
-    #transactions = transactions['transactions'][0]['isHighRiskCountry'] = 1
-    #pprint(['transactions'][0])
-    ##pprint(transactions['transactions'][0])
+newList = []
+i=0
+for c, t in enumerate(trans):
+    if (t['amount']) < 0:
+        tempAmount = t['amount']
+        tempAmount = weightingFunction(tempAmount)
+        transactions['transactions'][c]['amount'] = tempAmount
+        newList.append(tempAmount)
+        i=i+1
+
+transactions['transactions'][-1]['isHighRiskCountry'] = 0
+
+total=sum(newList) 
+average=total/i
+
+
     
 def getFraud():
     transactionAmount = transactions['transactions'][-1]['amount']
@@ -56,12 +47,6 @@ def getFraud():
     s = transactions['transactions'][-1]['merchant']['id']
     merchantId = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**8
 
-    toSum = 0
-    counter = 0
-    for t in transactions['transactions']:
-        toSum = toSum + transactions['transactions'][counter]['amount']
-        counter = counter + 1
-    average = toSum / counter
 
     # Merchant_id 	Average Amount/transaction/day 	Transaction_amount 	Is declined 	isForeignTransaction 	isHighRiskCountry
     #return [[merchantId, average, transactionAmount, isDeclined, isForeignTransaction, isHighRiskCountry]]
@@ -86,22 +71,14 @@ def getLatestData():
     s = transactions['transactions'][-1]['merchant']['id']
     merchantId = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**8
 
-    toSum = 0
-    counter = 0
-    for t in transactions['transactions']:
-        toSum = toSum + transactions['transactions'][counter]['amount']
-        counter = counter + 1
-    average = toSum / counter
 
     # Merchant_id 	Average Amount/transaction/day 	Transaction_amount 	Is declined 	isForeignTransaction 	isHighRiskCountry
     #return [[merchantId, average, transactionAmount, isDeclined, isForeignTransaction, isHighRiskCountry]]
     return [[average, transactionAmount, isDeclined, isForeignTransaction, isHighRiskCountry]]
 
 
-
-main()
-
 def do():
+
     import machineLearning
     x = np.reshape(getLatestData(), (1, 5))
     #machineLearning.predict(x, "Monzo")
@@ -109,9 +86,7 @@ def do():
 
 
     x = np.reshape(getFraud(), (1, 5))
-    machineLearning.predictKNN(x, "Monzo", "Fraudulent Data")
-
-    x = np.reshape(getFraud(), (1, 5))
-    machineLearning.predict(x, "Monzo", "Fraudulent Data")
-
-do()
+    resp = machineLearning.predictKNN(x, "Monzo", "Fraudulent Data")
+    #if (resp == 1):
+        #client.create_feed_item(account_id, 'basic', url="skerritt.tech", params = {'title': 'Fraud detected on your recent transaction!', 'body': 'Moving all money into a pot...', 'image_url': 'skerritt.tech/me.png'})
+        #print(client.get_pots)

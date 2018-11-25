@@ -61,8 +61,6 @@ record.update({'isHighRiskCountry': 0})
 record.update({'Is declined': 0})
 record.update({'Average Amount/transaction/day': averageTransaction})
 
-record['Merchant_id']=record.pop('transactionId')
-# Renames transactionid as merchantid simply so we still have an id to identify the transaction
 
 num=record['amount']['amount']
 record.update({'Transaction_amount': float(num)})
@@ -70,11 +68,18 @@ record.update({'Transaction_amount': float(num)})
 del record['amount']
 # Merchant_id 	Average Amount/transaction/day 	Transaction_amount 	Is declined 	isForeignTransaction 	isHighRiskCountry
 
-x = [[record['Merchant_id'], record['Average Amount/transaction/day'], record['Transaction_amount'], record['Is declined'], record['isForeignTransaction'], record['isHighRiskCountry']]]
 
 
+def do():
+  x = [[record['Average Amount/transaction/day'], record['Transaction_amount'], record['Is declined'], record['isForeignTransaction'], record['isHighRiskCountry']]]
 
-import machineLearning
-x = np.reshape(x, (1, 6))
-machineLearning.predictKNN(x, "Capital One")
-#machineLearning.predict(x, "Capital One")
+  import machineLearning
+  x = np.reshape(x, (1, 5))
+  # Average amount of transactions per day, transaction amount, was the transaction declined? Is the transaction performed in a foreign country? Is that country a 'high risk' country according to the Foreign Office?
+  machineLearning.predictKNN(x, "Capital One","Non Fraudulent Data")
+  # machineLearning.predict(x, "Capital One", "Non Fraudulent Data")
+
+  x = [[record['Average Amount/transaction/day'], 500000, 0, 1, 1]]
+  x = np.reshape(x, (1, 5))
+  machineLearning.predictKNN(x, "Capital One","Fraudulent Data")
+  # machineLearning.predict(x, "Capital One", "Fraudulent Data")
